@@ -4,49 +4,28 @@ namespace Tests;
 
 use App\TagParser;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class TagParserTest extends TestCase
 {
-  protected TagParser $parser; 
-  
-  protected function setUp(): void
-  {
-    $this->parser = new TagParser();
-  }
+	#[DataProvider('tagsProvider')]
+	public function test_it_parses_tags($input, $expected)
+	{
+		$parser = new TagParser();
 
-  public function test_it_a_single_tag()
-  {
-    $result = $this->parser->parse('personal');
-    $expected = ['personal'];
+		$result = $parser->parse($input);
 
-    $this->assertSame($expected, $result);
-  }
-  
-  public function test_it_parses_a_comma_separated_list_of_tags()
-  {
-    $result = $this->parser->parse('personal, money, family');
-    $expected = ['personal', 'money', 'family'];
+		$this->assertSame($expected, $result);
+	}
 
-    $this->assertSame($expected, $result);
-  }
-  
-  public function test_it_parses_a_pipe_separated_list_of_tags()
-  {
-    $result = $this->parser->parse('personal | money | family');
-    $expected = ['personal', 'money', 'family'];
-
-    $this->assertSame($expected, $result);
-  }
-  
-  public function test_spaces_are_optional()
-  {
-    $result = $this->parser->parse('personal,money,family');
-    $expected = ['personal', 'money', 'family'];
-    $this->assertSame($expected, $result);
-    
-    $result = $this->parser->parse('personal|money|family');
-    $expected = ['personal', 'money', 'family'];
-    $this->assertSame($expected, $result);
-  }
-
+	public static function tagsProvider(): array
+	{
+		return [
+			'a_single_tag' => ['personal', ['personal']],
+			'a_comma_separated_list_of_tags' => ['personal, money, family', ['personal', 'money', 'family']],
+			'a_pipe_separated_list_of_tags' => ['personal | money | family', ['personal', 'money', 'family']],
+			'an_exclamation_mark' => ['personal!money!family', ['personal', 'money', 'family']],
+			'tags_without_spaces' => ['personal|money|family', ['personal', 'money', 'family']],
+		];
+	}
 }
